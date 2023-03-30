@@ -7,11 +7,11 @@ def hello_world():
    return render_template('index.html')
    
 @app.errorhandler(404)
-def error_not_found(404):
+def error_not_found(error):
    return render_template('indexerror.html'), 404
    
 @app.errorhandler(500)
-def error_no_found(500):
+def error_no_found(error):
    return render_template('indexerror.html'), 500
    
 @app.route("/<name>/<number>")
