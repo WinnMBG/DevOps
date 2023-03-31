@@ -1,10 +1,37 @@
 version: "3.9"
 
 services:
+
+  mysql_cont:
+    container_name: "mysql_cont"
+    image: mysql:5.7
+    networks:
+      - my-network
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+      MYSQL_DATABASE: "studentdb"
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"
+    volumes:
+      - ./db2/:/docker-entrypoint-initdb.d
+      - ./db/:/var/lib/mysql
+
   flask_app:
     container_name: "flask"
+    depends_on: 
+      - mysql_cont
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
+    expose:
+      - "5000"
+    networks:
+      - my-network
+
+networks:
+  my-network:
