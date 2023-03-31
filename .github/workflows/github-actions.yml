@@ -15,7 +15,7 @@ jobs:
           pip install --upgrade flask
           pip install --upgrade pytest
           pip install --upgrade flask-sqlalchemy
-          apt-get install python3-dev default-libmysqlclient-dev build-essential -y
+          sudo apt-get install python3-dev default-libmysqlclient-dev build-essential -y
           pip install mysqlclient
       - uses: actions/checkout@v3
       - name: Test with pytest
