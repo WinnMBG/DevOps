@@ -1,4 +1,4 @@
-name: Python testing
+name: Python testing and Docker Hub deployment
 
 on: [push]
 
@@ -14,9 +14,46 @@ jobs:
           sudo apt-get install python3 python3-pip -y
           pip install --upgrade flask
           pip install --upgrade pytest
+          pip install --upgrade flask-sqlalchemy
+          apt-get install python3-dev default-libmysqlclient-dev build-essential -y
+          pip install mysqlclient
       - uses: actions/checkout@v3
       - name: Test with pytest
         run: | 
           pytest test_flask.py
           echo "The job executed with success"
+        if: ${{ success() }}
+  
+  create-image-and-deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: deploy-docker
+    env:
+      DOCKER_HUB: ${{ secrets.DOCKER_REPO }}
+    
+    steps:
+    
+      - uses: actions/checkout@v3
+      - name: Connecting to Docker Hub
+        env:
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+          echo "Logged in !"
+        if: ${{ success() }}
+      
+      - uses: actions/checkout@v3
+      - name: Builing the image
+        run: |
+          docker build -t dockimg .
+          docker tag dockimg $DOCKER_HUB
+          echo "Image tagged !"
+        if: ${{ success() }}
+      
+      - uses: actions/checkout@v3
+      - name: Deploying the image on Docker Hub
+        run: |
+          docker push $DOCKER_HUB
+          echo "Congrats ! You've just pushed your image on the Docker Hub !"
         if: ${{ success() }}
